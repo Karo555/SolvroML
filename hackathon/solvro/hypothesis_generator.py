@@ -64,10 +64,11 @@ class HypothesisGenerator(HypothesisGeneratorProtocol):
         return state["statement"]
 
     def __parse_references(self, state: HackathonState) -> list[str]:
+        """Return a list of formatted reference strings."""
         list_of_dicts = state.get("references", [])
         return [
-                {"\n".join(f"- {ref.get('title', 'Unknown Title')} ({ref.get('year', 'n.d.')}) - {ref.get('source', 'Unknown Source')}" 
-            for ref in list_of_dicts)}
+            f"- {ref.get('title', 'Unknown Title')} ({ref.get('year', 'n.d.')}) - {ref.get('source', 'Unknown Source')}"
+            for ref in list_of_dicts
         ]
 
     def __str__(self) -> str:

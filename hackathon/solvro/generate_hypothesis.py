@@ -42,17 +42,12 @@ def main(file: str, output: str):
     logger.info(f"Saving mechanistic summaries to {output_path}")
     with open(output_path / "paths.json", "w") as f:
         json.dump(hypothesis.metadata["mechanistic_summaries"], f, indent=4)
-        
-    from pprint import pprint
-    pprint(hypothesis.references)
 
     # Save hypothesis in json and md format
     logger.info(f"Saving hypothesis to {output_path}")
     output_path.mkdir(parents=True, exist_ok=True)
     hypothesis.save(backend_path=output_path, parser_type="json")
     hypothesis.save(backend_path=output_path, parser_type="md")
-
-    # logger.info(f"Hypothesis saved to {output_path}")
 
 
 if __name__ == "__main__":
