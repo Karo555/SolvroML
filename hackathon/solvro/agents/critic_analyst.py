@@ -29,10 +29,10 @@ Your task:
 - Provide clear reasoning for your decision
 
 Return only valid JSON in the following format:
-{
+{{
   "critique": "<Detailed critique explaining your reasoning>",
   "is_accepted": <true if hypothesis is novel, correct, and valuable; false otherwise>
-}
+}}
 
 Hypothesis Title: {title}
 Hypothesis Statement: {statement}
