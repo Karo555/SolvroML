@@ -72,10 +72,8 @@ class BiorxivQueryRun(BaseTool):  # type: ignore[override]
 
     def _run(
         self,
-        start_date: str,
-        end_date: str,
-        category: str,
+        query: str,
         run_manager: Optional[CallbackManagerForToolRun] = None,
     ) -> str:
         """Use the PubMed tool."""
-        return self.api_wrapper.fetch_details_by_date_range(start_date=start_date, end_date=end_date, category=category)
+        return self.api_wrapper.fetch_details_by_date_range(start_date="2025-03-21", end_date="2025-03-28", category=query)

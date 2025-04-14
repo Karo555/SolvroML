@@ -3,9 +3,10 @@ import logging
 import os
 from typing import Any, Dict, List, Optional
 
-from langchain import BaseModel
+from pydantic import BaseModel, Field, field_validator, model_validator
 from langchain.schema import Document
 from langchain_core.callbacks import CallbackManagerForToolRun
+from langchain.tools import BaseTool
 
 
 logger = logging.getLogger(__name__)
@@ -48,8 +49,8 @@ class ArxivAPIWrapper(BaseModel):
             arxiv.run("tree of thought llm)
     """
 
-    arxiv_search: Any  #: :meta private:
-    arxiv_exceptions: Any  # :meta private:
+    arxiv_search: Any = None #: :meta private:
+    arxiv_exceptions: Any = "not_found" #: :meta private:
     top_k_results: int = 10
     ARXIV_MAX_QUERY_LENGTH: int = 300
     load_max_docs: int = 100
@@ -58,23 +59,22 @@ class ArxivAPIWrapper(BaseModel):
     mindate: str = None
     maxdate: str = None
 
-    def validate_environment(cls, values: Dict) -> Dict:
-        """Validate that the python package exists in environment."""
+    @model_validator(mode="after")
+    def validate_environment(self) -> "ArxivAPIWrapper":
         try:
             import arxiv
-            values["arxiv_search"] = arxiv.Search
-            values["arxiv_exceptions"] = (
+            self.arxiv_search = arxiv.Search
+            self.arxiv_exceptions = (
                 arxiv.ArxivError,
                 arxiv.UnexpectedEmptyPageError,
                 arxiv.HTTPError,
             )
-            values["arxiv_result"] = arxiv.Result
         except ImportError:
             raise ImportError(
                 "Could not import arxiv python package. "
                 "Please install it with `pip install arxiv`."
             )
-        return values
+        return self
 
     def run(self, query: str) -> str:
         """
