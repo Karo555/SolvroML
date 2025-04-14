@@ -1,84 +1,74 @@
 [
     {
-        "path_summary": "Inflammation cascade in rheumatoid arthritis",
+        "path_summary": "Pathway from acute flares in rheumatoid arthritis to fibroblast-like synoviocytes regulation",
         "key_entities": [
             {
-                "entity": "Bridge Therapy",
-                "role": "management approach",
-                "definition": "Therapy intended to transition a patient from one therapy or medication to another or maintain their health or status until they are a candidate for a therapy or have decided on a therapy.",
-                "ontology_id": "http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#C174554",
-                "synonyms": [
-                    "Bridge Therapy",
-                    "Therapies, Bridge"
-                ]
-            },
-            {
                 "entity": "acute flares in rheumatoid arthritis",
-                "role": "clinical manifestation",
-                "definition": "Acute flares in rheumatoid arthritis are episodes characterized by increased inflammation and pain in joints due to the autoimmune nature of the disease. It often leads to significant morbidity in affected patients.",
+                "role": "initiator",
+                "definition": "Acute flares in rheumatoid arthritis are characterized by sudden increases in joint inflammation and pain, often leading to significant disability. These episodes can be triggered by various factors, including stress, infections, or changes in medication.",
                 "ontology_id": "http://purl.bioontology.org/ontology/SNOMEDCT/69896004",
                 "synonyms": [
                     "RA flares",
-                    "acute rheumatoid arthritis exacerbation"
+                    "rheumatoid arthritis exacerbation"
                 ]
             },
             {
                 "entity": "C-reactive protein",
-                "role": "marker",
-                "definition": "C-reactive protein (CRP) is an acute phase protein produced by the liver that increases in response to inflammation. It's involved in the immune response and can indicate inflammatory diseases when elevated.",
-                "ontology_id": "http://purl.bioontology.org/ontology/SNOMEDCT/61425002",
+                "role": "inducer",
+                "definition": "C-reactive protein (CRP) is an acute phase protein produced by the liver in response to inflammation. It plays a role in the immune response and is used clinically as a biomarker for inflammatory conditions.",
+                "ontology_id": "http://purl.obolibrary.org/obo/PR_000005897",
                 "synonyms": [
                     "CRP",
-                    "C-reactive protein (substance)",
-                    "C reactive protein"
+                    "C-reactive protein",
+                    "Pentraxin 1"
                 ]
             },
             {
                 "entity": "monocyte activation",
-                "role": "cellular response",
+                "role": "mediator",
                 "definition": "The change in morphology and behavior of a monocyte resulting from exposure to a cytokine, chemokine, cellular ligand, or soluble factor.",
                 "ontology_id": "http://purl.obolibrary.org/obo/GO_0042117",
                 "synonyms": [
-                    "Monocyte activation",
-                    "Monocyte Activation involved in immune response"
+                    "monocyte activation"
                 ]
             },
             {
                 "entity": "pro-inflammatory cytokines",
-                "role": "immune mediators",
-                "definition": "Cytokines that activate and regulate the inflammatory response, often produced in response to injury or infection. They play a key role in mediating inflammation and can promote a wide range of effects on various cell types.",
-                "ontology_id": "http://purl.obolibrary.org/obo/PW_0000926",
+                "role": "mediator",
+                "definition": "Pro-inflammatory cytokines are signaling molecules that promote inflammation and activate immune responses, playing a crucial role in various physiological and pathological processes.",
+                "ontology_id": "http://regenbase.org/ontology#RB_0000273",
                 "synonyms": [
-                    "pro-inflammatory cytokines",
-                    "cytokines"
+                    "pro-inflammatory cytokine",
+                    "proinflammatory cytokines"
                 ]
             },
             {
                 "entity": "matrix metalloproteinases",
-                "role": "enzymes",
-                "definition": "Matrix metalloproteinases (MMPs) are zinc-dependent enzymes that degrade extracellular matrix components, playing vital roles in tissue remodeling, wound healing, and various diseases including cancer.",
+                "role": "mediator",
+                "definition": "Matrix metalloproteinases (MMPs) are a family of zinc-dependent endopeptidases that degrade extracellular matrix components, playing crucial roles in tissue remodeling, wound healing, and various diseases, including cancer.",
                 "ontology_id": "http://id.nlm.nih.gov/mesh/D020782",
                 "synonyms": [
                     "MMP",
-                    "Matrix Metalloproteinases",
-                    "Metalloproteinases, Matrix"
+                    "matrix metalloproteinase",
+                    "metalloproteinase, matrix",
+                    "matrix metalloproteinases"
                 ]
             },
             {
                 "entity": "extracellular matrix components",
-                "role": "structural components",
-                "definition": "Extracellular matrix (ECM) is a network of proteins and carbohydrates that provide structural and biochemical support to surrounding cells. It plays a crucial role in cellular communication, growth, and development.",
+                "role": "target",
+                "definition": "A structure lying external to one or more cells, which provides structural support, biochemical or biomechanical cues for cells or tissues. It is crucial for tissue integrity and cellular function.",
                 "ontology_id": "http://purl.obolibrary.org/obo/GO_0031012",
                 "synonyms": [
-                    "ECM",
                     "matrisome",
-                    "extracellular matrices"
+                    "ECM",
+                    "extracellular ground substance"
                 ]
             },
             {
                 "entity": "fibroblast-like synoviocytes in rheumatoid arthritis joints",
-                "role": "target cells",
-                "definition": "Fibroblast-like synoviocytes (FLS) are specialized cells in the synovial membrane, playing crucial roles in joint health and inflammation in rheumatoid arthritis. They contribute to the pathology of the disease through their proliferative and inflammatory activities.",
+                "role": "endpoint",
+                "definition": "Fibroblast-like synoviocytes (FLS) are specialized cells in the synovial membrane of joints, particularly involved in rheumatoid arthritis. They contribute to inflammation and joint damage by producing pro-inflammatory cytokines and matrix metalloproteinases.",
                 "ontology_id": "http://purl.obolibrary.org/obo/BTO_0003703",
                 "synonyms": [
                     "rheumatoid arthritis disease specific fibroblast-like cell",
@@ -92,46 +82,40 @@
         ],
         "relationships": [
             {
-                "source": "Bridge Therapy",
-                "relation": "is often used to manage",
-                "target": "acute flares in rheumatoid arthritis",
-                "interpretation": "Management of disease exacerbations"
-            },
-            {
                 "source": "acute flares in rheumatoid arthritis",
                 "relation": "are characterized by elevated levels of",
                 "target": "C-reactive protein",
-                "interpretation": "Clinical marker of inflammation"
+                "interpretation": "Biological marker of acute inflammation"
             },
             {
                 "source": "C-reactive protein",
                 "relation": "can induce",
                 "target": "monocyte activation",
-                "interpretation": "Triggering cellular response"
+                "interpretation": "Induction of monocyte activation"
             },
             {
                 "source": "monocyte activation",
                 "relation": "leads to the production of",
                 "target": "pro-inflammatory cytokines",
-                "interpretation": "Generation of immune mediators"
+                "interpretation": "Stimulation of pro-inflammatory cytokine production"
             },
             {
                 "source": "pro-inflammatory cytokines",
                 "relation": "stimulate the expression of",
                 "target": "matrix metalloproteinases",
-                "interpretation": "Induction of enzyme production"
+                "interpretation": "Stimulation of matrix metalloproteinase expression"
             },
             {
                 "source": "matrix metalloproteinases",
                 "relation": "are involved in the degradation of",
                 "target": "extracellular matrix components",
-                "interpretation": "Enzymatic degradation of structural components"
+                "interpretation": "Involvement in extracellular matrix degradation"
             },
             {
                 "source": "extracellular matrix components",
                 "relation": "regulate the activity of",
                 "target": "fibroblast-like synoviocytes in rheumatoid arthritis joints",
-                "interpretation": "Influence on target cell behavior"
+                "interpretation": "Regulation of fibroblast-like synoviocytes activity"
             }
         ]
     }
