@@ -42,6 +42,7 @@ def create_context_agent(
     **kwargs
 ) -> Dict[str, Any]:
     llm = get_model(model, **kwargs)
+    llm.temperature = 0.2
 
     tool_agent = create_react_agent(
         model=llm,

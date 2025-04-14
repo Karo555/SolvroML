@@ -96,7 +96,7 @@ def create_graph_analyst_agent(
         ("human", GRAPH_ANALYST_PROMPT)
     ])
 
-    llm = ChatOpenAI(name=model).with_structured_output(GraphAnalysisOutput)
+    llm = ChatOpenAI(name=model, temperature=0.2).with_structured_output(GraphAnalysisOutput)
 
     chain = prompt | llm
 
