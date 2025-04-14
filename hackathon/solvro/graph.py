@@ -5,6 +5,7 @@ from langgraph.graph.graph import CompiledGraph
 from loguru import logger
 
 from .agents.graph_analyst import create_graph_analyst_agent
+from .agents.context import create_context_agent
 from .state import HackathonState
 
 
@@ -27,6 +28,7 @@ def create_hackathon_graph() -> CompiledGraph:
 
     # Add nodes with specialized agents
     graph.add_node("graph_analyst", create_graph_analyst_agent("reasoning")["agent"])
+    graph.add_node("context_agent", create_context_agent("small")["agent"])
     # graph.add_node(
     #     "hypothesis_generator", create_hypothesis_generator_agent("small")["agent"]
     # )
@@ -44,6 +46,8 @@ def create_hackathon_graph() -> CompiledGraph:
 
     # Add edges
     graph.add_edge(START, "graph_analyst")
+    graph.add_edge("graph_analyst", "context_agent")
+    # graph.add_edge("graph_analyst", "evidence_agent")
     # graph.add_edge("ontologist", "hypothesis_generator")
     # # From initial hypothesis
     # graph.add_edge("hypothesis_generator", "literature_agent")
@@ -62,7 +66,7 @@ def create_hackathon_graph() -> CompiledGraph:
     #     "critique_analyst",
     #     improve_hypothesis,
     # )
-    graph.add_edge("graph_analyst", END)
+    graph.add_edge("context_agent", END)
 
     return graph.compile()
 
