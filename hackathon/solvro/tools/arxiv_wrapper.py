@@ -198,9 +198,6 @@ def arxiv_tool(
 
     Args:
         query: A search query related to scientific research.
-        tool_call_id: Injected tool call ID.
-        config: Runnable configuration.
-        state: Injected state.
 
     Returns:
         A dictionary with information about the retrieved papers.

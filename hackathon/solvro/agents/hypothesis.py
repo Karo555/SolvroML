@@ -51,23 +51,51 @@ def create_hypothesis_synthesis_agent(
         ("system", "You are a biomedical hypothesis generation assistant."),
         ("human", HYPOTHESIS_PROMPT)
     ])
-
     chain = prompt | llm
 
     def agent(state: HackathonState) -> HackathonState:
-        logger.info("🧠 Synthesizing hypothesis from graph and context")
+        logger.info("🧠 Synthesizing hypothesis from merged graph, context, and evidence")
+
+        # Get all the relevant summaries
+        base = state.get("mechanistic_summaries", [])
+        entity_updates = state.get("entity_context_updates", [])
+        rel_updates = state.get("relationship_evidence_updates", [])
+
+        # Merge into a new structure
+        summary_index = {s["path_summary"]: dict(s) for s in base}
+
+        for updated in entity_updates:
+            key = updated["path_summary"]
+            if key in summary_index:
+                summary_index[key]["key_entities"] = updated.get("key_entities", [])
+
+        for updated in rel_updates:
+            key = updated["path_summary"]
+            if key in summary_index:
+                summary_index[key]["relationships"] = updated.get("relationships", [])
+
+        merged_summaries = list(summary_index.values())
 
         try:
-            summaries = json.dumps(state.get("mechanistic_summaries", []), indent=2)
+            formatted = json.dumps(merged_summaries, indent=2)
             result: HypothesisOutput = chain.invoke({
-                "mechanistic_summaries": summaries
+                "mechanistic_summaries": formatted
             })
+            
+            all_refs = []
+
+            for summary in merged_summaries:
+                for rel in summary.get("relationships", []):
+                    references = rel.get("references", [])
+                    if references:
+                        all_refs.extend(references)
 
             logger.info(f"✅ Hypothesis synthesized: {result.title}")
             return HackathonState(
                 title=result.title,
                 statement=result.statement,
-                mechanistic_summaries=state.get("mechanistic_summaries", []),
+                references=all_refs,
+                mechanistic_summaries=merged_summaries,
                 messages=state.get("messages", []) + [
                     AIMessage(name="hypothesis_agent", content=f"Title: {result.title}\nStatement: {result.statement}")
                 ],
@@ -78,7 +106,8 @@ def create_hypothesis_synthesis_agent(
             return HackathonState(
                 title="[Failed to generate title]",
                 statement="[Failed to generate statement]",
-                mechanistic_summaries=state.get("mechanistic_summaries", []),
+                references=[],
+                mechanistic_summaries=merged_summaries,
                 messages=state.get("messages", []) + [
                     AIMessage(name="hypothesis_agent", content="Failed to generate hypothesis.")
                 ],

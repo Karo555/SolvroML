@@ -124,9 +124,6 @@ def bioportal_tool(
     
     Args:
         query: A biomedical term or concept to search for in BioPortal.
-        tool_call_id: Injected tool call ID.
-        config: Runnable configuration.
-        state: Injected state.
 
     Returns:
         A dictionary containing the search results from BioPortal.

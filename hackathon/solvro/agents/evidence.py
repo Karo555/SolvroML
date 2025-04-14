@@ -5,34 +5,30 @@ from langgraph.prebuilt.chat_agent_executor import create_react_agent
 from langgraph.prebuilt import ToolNode
 from langchain_core.messages import AIMessage
 from loguru import logger
-from ..tools import arxiv_tool, pubmed_tool, bioportal_tool
 
-# from ..tools.evidence import 
+from ..tools import arxiv_tool, pubmed_tool, bioportal_tool#, biorxiv_tool
 from ..llm.utils import get_model
 from ..state import EvidenceAgentPrivateState, HackathonState
 
 EVIDENCE_PROMPT = """
 You are a biomedical literature evidence agent.
 
-Your task is to support the following biological relationship with relevant scientific evidence.
+Your task is to find supporting scientific literature for a biological relationship. Use literature tools and return your answer in valid JSON format ONLY. Do not include any extra explanation.
 
-Use access to literature databases provided by tools.
+Return **1 to 3 references** only. Each reference must contain a title, source, and a brief snippet that supports the relationship.
 
-Return **exactly 1-3 relevant references** in valid JSON.
-
-Use the following format exactly:
-
+JSON format:
 {{
   "relation": "<source> -[:relation]-> <target>",
   "references": [
-    {
+    {{
       "title": "Title of the paper",
       "authors": ["Last, F.", "Smith, A."],
       "year": 2021,
       "source": "PubMed",
       "url": "https://...",
-      "snippet": "A short quote from the abstract or result supporting the relation"
-    }
+      "snippet": "A short quote from the abstract or findings supporting the relation"
+    }}
   ]
 }}
 
@@ -43,12 +39,11 @@ Interpretation:
 {interpretation}
 """
 
-# ToolNode with literature tools
 evidence_tools = ToolNode([
+    # pubmed_tool,
     arxiv_tool,
     # biorxiv_tool,
-    pubmed_tool,
-    bioportal_tool
+    bioportal_tool,
 ])
 
 def create_evidence_agent(
@@ -69,17 +64,18 @@ def create_evidence_agent(
         updated_summaries = []
 
         for summary in summaries:
-            relationships = summary.get("relationships", [])
-            enriched_relationships = []
+            updated_relationships = []
 
-            for rel in relationships:
+            for rel in summary.get("relationships", []):
                 source = rel.get("source")
                 target = rel.get("target")
                 relation = rel.get("relation")
                 interpretation = rel.get("interpretation", "")
 
-                logger.info(f"📚 Searching for evidence: {source} -[:{relation}]-> {target}")
+                if not source or not target or not relation:
+                    continue
 
+                logger.info(f"📚 Searching evidence for: {source} -[:{relation}]-> {target}")
                 prompt = PromptTemplate.from_template(EVIDENCE_PROMPT)
                 messages = prompt.invoke({
                     "source": source,
@@ -95,24 +91,23 @@ def create_evidence_agent(
                     })
 
                     raw = response["messages"][-1].content.strip()
+                    # logger.debug(f"🧾 Raw model output for {source} -[:{relation}]-> {target}:\n{raw}")
                     parsed = json.loads(raw)
+
                     rel["references"] = parsed.get("references", [])
 
                 except Exception as e:
-                    logger.warning(f"❌ Failed to retrieve evidence for {source} → {target}: {e}")
+                    logger.warning(f"⚠️ JSON parsing failed for relation {source} → {target}: {e}")
                     rel["references"] = []
 
-                enriched_relationships.append(rel)
+                updated_relationships.append(rel)
 
-            summary["relationships"] = enriched_relationships
+            summary["relationships"] = updated_relationships
             updated_summaries.append(summary)
 
         return HackathonState(
-            mechanistic_summaries=updated_summaries,
-            messages=state.get("messages", []),
+            relationship_evidence_updates=updated_summaries,
+            messages=state.get("messages", [])
         )
 
     return {"agent": agent}
-
-if __name__ == "__main__":
-    agent = create_evidence_agent("large")

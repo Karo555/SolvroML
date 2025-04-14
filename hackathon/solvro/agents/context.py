@@ -35,10 +35,6 @@ Entity to enrich:
 
 context_tools = ToolNode([
     query_uniprot,
-    arxiv_tool,
-    pubmed_tool,
-    bioportal_tool,
-    # biorxiv_tool
 ])
 
 def create_context_agent(
@@ -103,7 +99,7 @@ def create_context_agent(
             updated_summaries.append(summary)
 
         return HackathonState(
-            mechanistic_summaries=updated_summaries,
+            entity_context_updates=updated_summaries,
             messages=state.get("messages", [])
         )
 

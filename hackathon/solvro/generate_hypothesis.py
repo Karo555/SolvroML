@@ -44,8 +44,7 @@ def main(file: str, output: str):
         json.dump(hypothesis.metadata["mechanistic_summaries"], f, indent=4)
         
     from pprint import pprint
-    pprint(hypothesis.title)
-    pprint(hypothesis.statement)
+    pprint(hypothesis.references)
 
     # Save hypothesis in json and md format
     logger.info(f"Saving hypothesis to {output_path}")

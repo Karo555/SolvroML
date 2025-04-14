@@ -6,7 +6,7 @@ from loguru import logger
 
 from .agents.graph_analyst import create_graph_analyst_agent
 from .agents.context import create_context_agent
-# from .agents.evidence import create_evidence_agent
+from .agents.evidence import create_evidence_agent
 from .agents.hypothesis import create_hypothesis_synthesis_agent
 from .state import HackathonState
 
@@ -24,22 +24,13 @@ from .state import HackathonState
 #         logger.info("Hypothesis rejected after {} iterations", state["iteration"])
 #         return "hypothesis_refiner"
 
-def hypothesis_generator_mock(state: HackathonState) -> HackathonState:
-    """
-    A mock hypothesis generator that returns a static hypothesis.
-    """
-    logger.info("Generating hypothesis...")
-    state["hypothesis"] = "This is a mock hypothesis."
-    state["iteration"] += 1
-    return state
-
 def create_hackathon_graph() -> CompiledGraph:
     graph = StateGraph(HackathonState)
 
     # Add nodes with specialized agents
     graph.add_node("graph_analyst", create_graph_analyst_agent("reasoning")["agent"])
     graph.add_node("context_agent", create_context_agent("small")["agent"])
-    # graph.add_node("evidence_agent", create_evidence_agent("small")["agent"])
+    graph.add_node("evidence_agent", create_evidence_agent("small")["agent"])
     graph.add_node("hypothesis_generator", create_hypothesis_synthesis_agent("reasoning")["agent"])
 
     # Add edges
@@ -47,11 +38,11 @@ def create_hackathon_graph() -> CompiledGraph:
     
     # Fork
     graph.add_edge("graph_analyst", "context_agent")
-    # graph.add_edge("graph_analyst", "evidence_agent")
+    graph.add_edge("graph_analyst", "evidence_agent")
     
     # Join
     graph.add_edge("context_agent", "hypothesis_generator")
-    # graph.add_edge("evidence_agent", "hypothesis_generator")
+    graph.add_edge("evidence_agent", "hypothesis_generator")
     
     # graph.add_conditional_edges(
     #     "critique_analyst",

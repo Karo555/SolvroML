@@ -28,13 +28,13 @@ class HypothesisGenerator(HypothesisGeneratorProtocol):
 
         title = self.__parse_title(res, subgraph) or ""
         statement = self.__parse_statement(res)
-        # references = self.__parse_references(res)
+        references = self.__parse_references(res)
         return Hypothesis(
             title=title,
             statement=statement,
             source=subgraph,
             method=self,
-            # references=references,
+            references=references,
             metadata={
                 "mechanistic_summaries": res["mechanistic_summaries"],
                 "context": res["context"],
