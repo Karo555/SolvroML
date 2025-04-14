@@ -6,9 +6,16 @@ from typing import Annotated, Dict, Any
 
 from .backends.UniProtAPIWrapper import UniProtAPIWrapper
 from .backends.UniProtQueryTool import parse_uniprot_entry
+from .backends.EnsemblApiManager import EnsemblApiClient
+
+from backends.BioRxivAPIManager import BioRxivAPIManager
 
 # Initialize UniProt wrapper
 api_wrapper = UniProtAPIWrapper()
+# Initialize BioRxiv API manager
+biorxiv_api = BioRxivAPIManager()
+# Initialize Ensembl API client
+ensembl_api = EnsemblApiClient()
 
 @tool("query_uniprot", parse_docstring=True)
 def query_uniprot(
@@ -43,3 +50,353 @@ def query_uniprot(
         "ontology_id": parsed.get("accession"),
         "synonyms": parsed.get("gene_names", []),
     }
+@tool("biorxiv_search", parse_docstring=True)
+def biorxiv_search_by_doi(
+    query: str,
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Dict[str, Any]:
+    """
+    Searches BioRxiv for preprints related to a given query.
+
+    Args:
+        query (str): A search term or phrase.
+
+    Returns:
+        dict: A structured dictionary with metadata about the preprints.
+    """
+    return biorxiv_api.fetch_details_by_doi(query)
+@tool("biorxiv_search_by_date", parse_docstring=True)
+def biorxiv_search_by_date_range(
+    query: Dict[str, Any],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Dict[str, Any]:
+    """
+    Searches BioRxiv for preprints related to a given query.
+
+    Args:
+        query (str): A search term or phrase.
+
+    Returns:
+    dict: A structured dictionary with metadata about the preprints.
+    """
+    start_date = query.get("start_date")
+    end_date = query.get("end_date")
+    cursor = query.get("cursor", 0)
+    category = query.get("category", None)
+    format = query.get("format", "json")
+
+    return biorxiv_api.fetch_details_by_date_range(
+        start_date, end_date, cursor, category, format
+    )
+@tool("biorxiv_fetch_publication_details", parse_docstring=True)
+def biorxiv_published_details_by_date(
+    query: Dict[str, Any],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Dict[str, Any]:
+    """
+    Fetches published article details within a specified date range.
+
+    Args:
+        query (dict): A dictionary containing the start and end dates, cursor, and format.
+
+    Returns:
+        dict: A structured dictionary with metadata about the preprints.
+    """
+    start_date = query.get("start_date")
+    end_date = query.get("end_date")
+    cursor = query.get("cursor", 0)
+    format = query.get("format", "json")
+
+    return biorxiv_api.fetch_published_details_by_date(
+        start_date, end_date, cursor, format
+    )
+@tool("biorxiv_fetch_usage_statistics", parse_docstring=True)
+def biorxiv_usage_statistics(
+    query: Dict[str, Any],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Dict[str, Any]:
+    """
+    Fetches usage statistics for a specific article.
+
+    Args:
+        query (str): The DOI of the article.
+
+    Returns:
+        dict: A structured dictionary with metadata about the preprints.
+    """
+    return biorxiv_api.fetch_usage_statistics(query)
+
+
+@tool("ensembl_get_genetree_by_id", parse_docstring=True)
+def ensembl_get_genetree_by_id(
+    query: str,
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Dict[str, Any]:
+    """
+    Retrieves a gene tree by its ID.
+
+    Args:
+        query (str): The ID of the gene tree.
+
+    Returns:
+        dict: The JSON response containing the gene tree data.
+    """
+    return ensembl_api.get_genetree_by_id(query)
+
+@tool("ensembl_get_xrefs_by_symbol", parse_docstring=True)
+def ensembl_get_xrefs_by_symbol(
+    query: Dict[str, Any],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Dict[str, Any]:
+    """
+    Retrieves all Ensembl objects linked to an external symbol.
+
+    Args:
+        query (dict): A dictionary containing the species name and symbol.
+
+    Returns:
+        dict: The JSON response containing the linked Ensembl objects.
+    """
+    species = query.get("species")
+    symbol = query.get("symbol")
+    return ensembl_api.get_xrefs_by_symbol(species, symbol)
+
+@tool("ensembl_get_assembly_info", parse_docstring=True)
+def ensembl_get_assembly_info(
+    query: str,
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Dict[str, Any]:
+    """
+    Retrieves assembly information for a specific species.
+
+    Args:
+        query (str): The species name.
+
+    Returns:
+        dict: The JSON response containing the assembly information.
+    """
+    return ensembl_api.get_assembly_info(query)
+
+@tool("ensembl_get_species_list", parse_docstring=True)
+def ensembl_get_species_list(
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Dict[str, Any]:
+    """
+    Retrieves a list of all species available in the Ensembl database.
+
+    Returns:
+        dict: The JSON response containing the list of species.
+    """
+    return ensembl_api.get_species_list()
+@tool("ensembl_get_sequence_by_id", parse_docstring=True)
+def ensembl_get_sequence_by_id(
+    query: str,
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Dict[str, Any]:
+    """
+    Retrieves the sequence for a specific stable ID.
+
+    Args:
+        query (str): The stable ID of the sequence to retrieve.
+
+    Returns:
+        dict: The JSON response containing the sequence data.
+    """
+    return ensembl_api.get_sequence_by_id(query)
+
+@tool("ensembl_get_variation_by_id", parse_docstring=True)
+def ensembl_get_variation_by_id(
+    query: Dict[str, Any],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Dict[str, Any]:
+    """
+    Fetches variation features by Ensembl ID (e.g., rsID).
+
+    Args:
+        query (dict): A dictionary containing the species name and variant ID.
+
+    Returns:
+        dict: The JSON response containing the variation features.
+    """
+    species = query.get("species")
+    variant_id = query.get("variant_id")
+    return ensembl_api.get_variation_by_id(species, variant_id)
+
+@tool("ensembl_get_phenotype_by_gene", parse_docstring=True)
+def ensembl_get_phenotype_by_gene(
+    query: Dict[str, Any],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Dict[str, Any]:
+    """
+    Retrieves phenotype annotations for a specific gene in a species.
+
+    Args:
+        query (dict): A dictionary containing the species name and gene ID.
+
+    Returns:
+        dict: The JSON response containing the phenotype annotations.
+    """
+    species = query.get("species")
+    gene_id = query.get("gene_id")
+    return ensembl_api.get_phenotype_by_gene(species, gene_id)
+
+@tool("ensembl_get_species_biotypes", parse_docstring=True)
+def ensembl_get_species_biotypes(
+    query: str,
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Dict[str, Any]:
+    """
+    Retrieves all biotypes available for a specific species.
+
+    Args:
+        query (str): The species name.
+
+    Returns:
+        dict: The JSON response containing the biotypes.
+    """
+    return ensembl_api.get_biotypes(query)
+
+@tool("ensembl_get_phenotype_by_region", parse_docstring=True)
+def ensembl_get_phenotype_by_region(
+    query: Dict[str, Any],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Dict[str, Any]:
+    """
+    Retrieves phenotype annotations for a specific genomic region.
+
+    Args:
+        query (dict): A dictionary containing the species name and genomic region.
+
+    Returns:
+        dict: The JSON response containing the phenotype annotations.
+    """
+    species = query.get("species")
+    region = query.get("region")
+    return ensembl_api.get_phenotype_by_region(species, region)
+
+@tool("ensembl_get_sequence_by_region", parse_docstring=True)
+def ensembl_get_sequence_by_region(
+    query: Dict[str, Any],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Dict[str, Any]:
+    """
+    Retrieves the sequence for a specific genomic region.
+
+    Args:
+        query (dict): A dictionary containing the species name and genomic region.
+
+    Returns:
+        dict: The JSON response containing the sequence data.
+    """
+    species = query.get("species")
+    region = query.get("region")
+    return ensembl_api.get_sequence_by_region(species, region)
+@tool("ensembl_get_vep_by_id", parse_docstring=True)
+def ensembl_get_vep_by_id(
+    query: Dict[str, Any],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Dict[str, Any]:
+    """
+    Retrieves VEP (Variant Effect Predictor) data for a specific variant.
+
+    Args:
+        query (dict): A dictionary containing the species name and variant ID.
+
+    Returns:
+        dict: The JSON response containing the VEP data.
+    """
+    species = query.get("species")
+    variant_id = query.get("variant_id")
+    return ensembl_api.get_vep_by_id(species, variant_id)
+
+@tool("ensembl_get_variant_recoder", parse_docstring=True)
+def esembl_get_variant_recorder(
+    query: Dict[str, Any],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Dict[str, Any]:
+    """
+    Retrieves variant recoder data for a specific variant.
+
+    Args:
+        query (dict): A dictionary containing the species name and variant ID.
+
+    Returns:
+        dict: The JSON response containing the variant recoder data.
+    """
+    species = query.get("species")
+    variant_id = query.get("variant_id")
+    return ensembl_api.get_variant_recoder(species, variant_id)
+
+@tool("ensembl_get_variation_by_pmcid", parse_docstring=True)
+def ensembl_get_variation_by_pmcid(
+    query: Dict[str, Any],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Dict[str, Any]:
+    """
+    Retrieves variation features by PubMed Central ID (PMC ID).
+
+    Args:
+        query (dict): A dictionary containing the species name and PMC ID.
+
+    Returns:
+        dict: The JSON response containing the variation features.
+    """
+    species = query.get("species")
+    pmcid = query.get("pmcid")
+    return ensembl_api.get_variation_by_pmcid(species, pmcid)
+@tool("ensembl_get_phenotype_by_pmid", parse_docstring=True)
+def get_variation_by_pmid(
+    query: Dict[str, Any],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Dict[str, Any]:
+    """
+    Retrieves phenotype annotations by PubMed ID (PMID).
+
+    Args:
+        query (dict): A dictionary containing the species name and PubMed ID.
+
+    Returns:
+        dict: The JSON response containing the phenotype annotations.
+    """
+    species = query.get("species")
+    pmid = query.get("pmid")
+    return ensembl_api.get_phenotype_by_pmid(species, pmid)
+
+@tool("eupmcapi_get_article_by_id", parse_docstring=True)
+
