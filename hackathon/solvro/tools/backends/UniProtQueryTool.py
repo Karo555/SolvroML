@@ -1,6 +1,6 @@
 from langchain.tools import BaseTool
 from typing import Optional
-from SolvroML.hackathon.solvro.tools.UniProtAPIWrapper import UniProtAPIWrapper
+from .UniProtAPIWrapper import UniProtAPIWrapper
 from langchain.tools import BaseTool
 from typing import Optional
 from pydantic import Field
@@ -105,22 +105,22 @@ def extract_cross_references(data: dict, databases: list[str] = None) -> dict:
     return refs
 
 
-if __name__ == "__main__":
-    uniprot_wrapper = UniProtAPIWrapper()
-    uniprot_tool = UniProtQueryTool(api_wrapper=uniprot_wrapper)
+# if __name__ == "__main__":
+#     uniprot_wrapper = UniProtAPIWrapper()
+#     uniprot_tool = UniProtQueryTool(api_wrapper=uniprot_wrapper)
 
-    test_query = "BRCA1"  # You can replace this with any protein or gene name
-    print(f"Querying UniProt for: {test_query}")
-    result = uniprot_tool.run(test_query)
+#     test_query = "BRCA1"  # You can replace this with any protein or gene name
+#     print(f"Querying UniProt for: {test_query}")
+#     result = uniprot_tool.run(test_query)
 
-    # if result:
-    #     print("✅ Result:")
-    #     for k, v in result.items():
-    #         print(f"{k}: {v}")
-    # else:
-    #     print("❌ No results found.")
+#     # if result:
+#     #     print("✅ Result:")
+#     #     for k, v in result.items():
+#     #         print(f"{k}: {v}")
+#     # else:
+#     #     print("❌ No results found.")
     
-    # raw_entry = api_wrapper.search("BRCA1")
-    parsed_entry = parse_uniprot_entry(result)
-    print(parsed_entry)
+#     # raw_entry = api_wrapper.search("BRCA1")
+#     parsed_entry = parse_uniprot_entry(result)
+#     print(parsed_entry)
 

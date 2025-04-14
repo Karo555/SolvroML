@@ -1,18 +1,19 @@
-from typing import Dict, List
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
 from langgraph.graph import MessagesState
 from pydantic import BaseModel
+from langgraph.prebuilt.chat_agent_executor import AgentState
 
 class MechanisticSummary(BaseModel):
     path_summary: str
     key_entities: List[Dict[str, str]]
     relationships: List[Dict[str, str]]
 
+@dataclass
 class HackathonState(MessagesState):
     subgraph: str
     context: str
     hypothesis: str
-    
-    
 
     literature: str
     references: list[str]
@@ -27,5 +28,9 @@ class HackathonState(MessagesState):
 
     iteration: int
     
-    # Graph Analyst agent
-    mechanistic_summaries: List[MechanisticSummary] = []
+    # Graph Analyst output
+    mechanistic_summaries: Optional[List[Dict[str, Any]]] = None
+    
+@dataclass
+class ContextAgentPrivateState(AgentState):
+    mechanistic_summaries: Optional[List[Dict[str, Any]]] = None
