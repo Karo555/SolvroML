@@ -66,7 +66,7 @@ class BioRxivAPIManager(BaseModel):
 biorxiv_api = BioRxivAPIManager()
 
 @tool("bioarxiv", parse_docstring=True)
-def biorxiv_search(
+def biorxiv_tool(
     query: str,
     tool_call_id: Annotated[str, InjectedToolCallId],
     config: RunnableConfig,
@@ -79,10 +79,16 @@ def biorxiv_search(
     emerging scientific findings in biology, medicine, and related disciplines.
     
     Args:
-        query (str): A category or topic to search for in bioRxiv.
-        
+        query: A category or topic to search for in bioRxiv.
+        tool_call_id: Injected tool call ID.
+        config: Runnable configuration.
+        state: Injected state.
+
     Returns:
-        dict: Results from the bioRxiv API containing preprint information.
+        A dictionary containing preprint information from the bioRxiv API.
     """
-    return biorxiv_api.fetch_details_by_date_range(start_date="2025-03-21", end_date="2025-03-28", category=query)
-    
+    return biorxiv_api.fetch_details_by_date_range(
+        start_date="2025-03-21",
+        end_date="2025-03-28",
+        category=query
+    )

@@ -3,7 +3,7 @@ import os
 from urllib.parse import quote
 import requests
 import logging
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from typing import List, Optional, Dict, Any, Annotated
 from langchain_core.callbacks import CallbackManagerForToolRun
 from langchain_core.tools import BaseTool, tool, InjectedToolCallId
@@ -25,18 +25,21 @@ class BioPortalClient(BaseModel):
         api_key: Your API key for accessing the BioPortal API.
     """
 
-    api_key: str
+    api_key: str = Field(default_factory=lambda: os.environ.get('BIOPORTAL_API_KEY', ''))
     headers: Dict[str, str] = {}
 
-    def validate_api_key(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+    @field_validator('api_key')
+    def validate_api_key(cls, api_key: str) -> str:
         """Validate that the API key is provided."""
-        api_key = os.environ.get('BIOPORTAL_API_KEY')
         if not api_key:
-            raise ValueError("API key must be provided.")
-        values['headers'] = {
-            "Authorization": f"apikey token={api_key}"
+            raise ValueError("API key must be provided as parameter or in BIOPORTAL_API_KEY environment variable.")
+        return api_key
+    
+    def model_post_init(self, __context) -> None:
+        """Set up headers after initialization."""
+        self.headers = {
+            "Authorization": f"apikey token={self.api_key}"
         }
-        return values
 
     BASE_URL: str = "https://data.bioontology.org"
 
@@ -107,7 +110,7 @@ class BioPortalClient(BaseModel):
 bioportal_client = BioPortalClient()
 
 @tool("bioportal", parse_docstring=True)
-def bioportal_search(
+def bioportal_tool(
     query: str,
     tool_call_id: Annotated[str, InjectedToolCallId],
     config: RunnableConfig,
@@ -120,9 +123,12 @@ def bioportal_search(
     genomic, and public health domains.
     
     Args:
-        query (str): A biomedical term or concept to search for in BioPortal.
-        
+        query: A biomedical term or concept to search for in BioPortal.
+        tool_call_id: Injected tool call ID.
+        config: Runnable configuration.
+        state: Injected state.
+
     Returns:
-        dict: Results from the BioPortal API containing ontology information.
+        A dictionary containing the search results from BioPortal.
     """
     return bioportal_client.search_terms(query)

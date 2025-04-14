@@ -55,11 +55,11 @@ class PubMedAPIWrapperImproved(PubMedAPIWrapper):
 pubmed_api_wrapper = PubMedAPIWrapperImproved(api_key=os.getenv("PUBMED_API_KEY"))
 
 @tool("pub_med", parse_docstring=True)
-def pubmed_search(
+def pubmed_tool(
     query: str,
-    tool_call_id: Annotated[str, InjectedToolCallId],
-    config: RunnableConfig,
-    state: Annotated[dict, InjectedState],
+    tool_call_id: Annotated[str, InjectedToolCallId] = None,
+    config: RunnableConfig = None,
+    state: Annotated[dict, InjectedState] = None,
 ) -> str:
     """
     A wrapper around PubMed.
@@ -67,9 +67,9 @@ def pubmed_search(
     and biomedical topics from biomedical literature, MEDLINE, life science journals, and online books.
     
     Args:
-        query (str): A search query for PubMed articles.
-        
-    Returns:
-        str: Results from PubMed containing relevant medical and biomedical information.
+        query: A search query for PubMed articles.
+        tool_call_id: Injected tool call ID.
+        config: Runnable configuration.
+        state: Injected state.
     """
     return pubmed_api_wrapper.run(query)

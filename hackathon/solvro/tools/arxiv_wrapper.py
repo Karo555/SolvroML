@@ -181,8 +181,9 @@ class ArxivAPIWrapper(BaseModel):
 # Initialize ArXiv wrapper
 arxiv_wrapper = ArxivAPIWrapper()
 
-@tool("arxiv_search", parse_docstring=True, return_direct=False)
-def query_arxiv(
+
+@tool("arxiv_tool", parse_docstring=True, return_direct=False)
+def arxiv_tool(
     query: str,
     tool_call_id: Annotated[str, InjectedToolCallId],
     config: RunnableConfig,
@@ -190,25 +191,28 @@ def query_arxiv(
 ) -> Dict[str, Any]:
     """
     Searches the arXiv API for scientific papers related to a given query.
-    
+
     Useful for answering questions related to physics, computer science, mathematics,
     quantitative biology, quantitative finance, statistics, and other academic topics
     based on scientific preprints from arXiv.
-    
+
     Args:
-        query (str): A search query related to scientific research.
-        
+        query: A search query related to scientific research.
+        tool_call_id: Injected tool call ID.
+        config: Runnable configuration.
+        state: Injected state.
+
     Returns:
-        dict: A structured dictionary with information about the retrieved papers.
+        A dictionary with information about the retrieved papers.
     """
     result = arxiv_wrapper.run(query)
-    
+
     if "No good Arxiv Result was found" in result or "Arxiv exception" in result:
         return {
             "error": f"No good arXiv results found for '{query}'.",
             "papers": []
         }
-    
+
     return {
         "papers": result
     }
