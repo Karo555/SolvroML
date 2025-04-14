@@ -36,10 +36,15 @@ dependencies = [
     "arxiv>=2.1.3",
     "xmltodict>=0.14.2",
     "langchain-google-genai>=2.1.0",
+    "pymupdf>=1.25.5",
+    "openai>=1.66.5",
 ]
 
 [project.scripts]
 ard = "ard.cli:cli"
+
+[tool.setuptools.find]
+packages = ["src"]
 
 [build-system]
 requires = ["hatchling"]

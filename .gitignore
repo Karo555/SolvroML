@@ -12,3 +12,6 @@ site/
 
 # cache
 .cache/
+
+# macos
+.DS_Store
