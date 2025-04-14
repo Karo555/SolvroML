@@ -219,11 +219,91 @@ class EuropePMCAPIManager:
         params = {"query": query, **kwargs}
         return self._request("status-update-search", params, method="POST")
 
-    def search(self, query: str, result_type: str = "lite", sort_by_citations: bool = False, **kwargs):
+    def search(
+            self,
+            query: str,
+            result_type: str = "lite",
+            sort_by_citations: bool = False,
+            sort_by_date: bool = False,
+            **kwargs
+    ):
+        """
+            Search for publications in the Europe PMC database using a keyword-based query.
+
+            This method queries the Europe PMC RESTful API with optional sorting and result type control.
+
+            Parameters:
+            ----------
+            query : str
+                The search query string (e.g., "CRISPR", "cancer AND p53", "COVID-19").
+            result_type : str, optional
+                Level of detail in the results. Options:
+                - "idlist": returns only IDs and sources.
+                - "lite": returns basic metadata (default).
+                - "core": returns full metadata including abstract, MeSH terms, citation counts, etc.
+            sort_by_citations : bool, optional
+                If True, sorts results by number of citations in descending order.
+            sort_by_date : bool, optional
+                If True, sorts results by publication date in descending order (most recent first).
+            **kwargs : dict
+                Additional query parameters supported by the Europe PMC API (e.g., pageSize, cursorMark).
+
+            Returns:
+            -------
+            dict or str
+                The API response in JSON (default) or XML format, depending on the `format` specified when
+                initializing the EuropePMCAPIManager instance.
+
+
+            """
         if sort_by_citations:
             query += " sort_cited:y"
+        elif sort_by_date:
+            query += " sort_date:y"
         params = {"query": query, "resultType": result_type, **kwargs}
         return self._request("search", params)
+
+    def get_most_cited_in_period(
+            self,
+            keyword: str,
+            start_year: int,
+            end_year: int,
+            result_type: str = "core",
+            max_results: int = 25,
+            **kwargs
+    ):
+        """
+        Retrieve the most cited publications for a keyword within a specific publication year range.
+
+        Parameters:
+        ----------
+        keyword : str
+            Search keyword(s), e.g. "CRISPR", "cancer AND p53".
+        start_year : int
+            Start of the publication year range (inclusive).
+        end_year : int
+            End of the publication year range (inclusive).
+        result_type : str, optional
+            Result type: "core" (default), "lite", or "idlist".
+        max_results : int, optional
+            Maximum number of results to return (default: 25).
+        **kwargs : dict
+            Additional query parameters (e.g., pageSize, format).
+
+        Returns:
+        -------
+        list
+            A list of articles sorted by citation count (desc).
+        """
+        query = f"{keyword} AND PUB_YEAR:[{start_year} TO {end_year}] sort_cited:y"
+        params = {
+            "query": query,
+            "resultType": result_type,
+            "pageSize": max_results,
+            **kwargs
+        }
+        result = self._request("search", params)
+        return result.get("resultList", {}).get("result", [])
 
 
 # Example usage:
@@ -231,9 +311,8 @@ if __name__ == "__main__":
     api = EuropePMCAPIManager()
 
     # Get articles related to "CRISPR", sorted by citation count
-    results = api.search("CRISPR", result_type="core", sort_by_citations=True)
+    top_cited = api.get_most_cited_in_period("CRISPR", 2023, 2024)
 
-    for i, hit in enumerate(results.get("resultList", {}).get("result", []), 1):
-        title = hit.get("title")
-        cited_by = hit.get("citedByCount")
-        print(f"{i}. {title} — Citations: {cited_by}")
+    for i, paper in enumerate(top_cited, 1):
+        print(f"{i}. ({paper.get('pubYear')}) {paper.get('title')}")
+        print(f"   Citations: {paper.get('citedByCount')}\n")
