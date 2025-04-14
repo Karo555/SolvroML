@@ -24,7 +24,7 @@ class HackathonState(MessagesState):
     # feasibility: str
     # impact: str
 
-    # critique: str
+    critique: str
     summary: str
     title: str
 

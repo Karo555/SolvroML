@@ -38,6 +38,8 @@ GRAPH_ANALYST_PROMPT = """You are a biomedical graph analyst.
 
 Given a subgraph extracted from a biomedical knowledge graph, your task is to identify and summarize each distinct mechanistic pathway or association described.
 
+{critique_feedback}
+
 The graph is formatted as:
 "
 node_1-[:relationship]->node_2
@@ -102,7 +104,16 @@ def create_graph_analyst_agent(
         logger.info("Starting structured graph analysis")
 
         subgraph_text = state["subgraph"]
-        result: GraphAnalysisOutput = chain.invoke({"subgraph": subgraph_text})
+        
+        # Include critique feedback if available
+        critique_feedback = ""
+        if state.get("critique", "").startswith("REJECT"):
+            critique_feedback = f"PREVIOUS CRITIQUE: {state.get('critique', '')}\nPlease consider this feedback when analyzing the graph for different mechanistic pathways."
+        
+        result: GraphAnalysisOutput = chain.invoke({
+            "subgraph": subgraph_text,
+            "critique_feedback": critique_feedback
+        })
 
         logger.info(f"Subgraph analysis completed successfully, found {len(result.mechanistic_summaries)} pathways")
         return {
@@ -110,6 +121,8 @@ def create_graph_analyst_agent(
             "messages": [
                 AIMessage(content="Graph analysis completed.", name="graph_analyst")
             ],
+            # Preserve iteration counter
+            "iteration": state.get("iteration", 0),
         }
 
     return {"agent": agent}
