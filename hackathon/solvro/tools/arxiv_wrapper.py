@@ -1,12 +1,14 @@
 """Util that calls Arxiv."""
 import logging
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Annotated
 
 from pydantic import BaseModel, Field, field_validator, model_validator
 from langchain.schema import Document
-from langchain_core.callbacks import CallbackManagerForToolRun
-from langchain.tools import BaseTool
+from langchain_core.tools import tool
+from langchain_core.runnables import RunnableConfig
+from langgraph.prebuilt import InjectedState
+from langchain_core.tools import InjectedToolCallId
 
 
 logger = logging.getLogger(__name__)
@@ -176,23 +178,37 @@ class ArxivAPIWrapper(BaseModel):
         return docs
 
 
-class ArxivQueryRun(BaseTool):  # type: ignore[override]
-    """Tool that searches the arXiv API."""
+# Initialize ArXiv wrapper
+arxiv_wrapper = ArxivAPIWrapper()
 
-    name: str = "arxiv_search"
-    description: str = (
-        "A wrapper around the arXiv API. "
-        "Useful for answering questions related to physics, computer science, mathematics, "
-        "quantitative biology, quantitative finance, statistics, and other academic topics "
-        "based on scientific preprints from arXiv. "
-        "Input should be a search query."
-    )
-    api_wrapper: ArxivAPIWrapper = Field(default_factory=ArxivAPIWrapper)  # type: ignore[arg-type]
-
-    def _run(
-        self,
-        query: str,
-        run_manager: Optional[CallbackManagerForToolRun] = None,
-    ) -> str:
-        """Use the arXiv tool."""
-        return self.api_wrapper.run(query)
+@tool("arxiv_search", parse_docstring=True, return_direct=False)
+def query_arxiv(
+    query: str,
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Dict[str, Any]:
+    """
+    Searches the arXiv API for scientific papers related to a given query.
+    
+    Useful for answering questions related to physics, computer science, mathematics,
+    quantitative biology, quantitative finance, statistics, and other academic topics
+    based on scientific preprints from arXiv.
+    
+    Args:
+        query (str): A search query related to scientific research.
+        
+    Returns:
+        dict: A structured dictionary with information about the retrieved papers.
+    """
+    result = arxiv_wrapper.run(query)
+    
+    if "No good Arxiv Result was found" in result or "Arxiv exception" in result:
+        return {
+            "error": f"No good arXiv results found for '{query}'.",
+            "papers": []
+        }
+    
+    return {
+        "papers": result
+    }

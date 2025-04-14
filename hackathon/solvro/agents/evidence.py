@@ -5,6 +5,7 @@ from langgraph.prebuilt.chat_agent_executor import create_react_agent
 from langgraph.prebuilt import ToolNode
 from langchain_core.messages import AIMessage
 from loguru import logger
+from ..tools import arxiv_tool, pubmed_tool, bioportal_tool
 
 # from ..tools.evidence import 
 from ..llm.utils import get_model
@@ -44,7 +45,10 @@ Interpretation:
 
 # ToolNode with literature tools
 evidence_tools = ToolNode([
-    ...
+    arxiv_tool,
+    # biorxiv_tool,
+    pubmed_tool,
+    bioportal_tool
 ])
 
 def create_evidence_agent(
@@ -109,3 +113,6 @@ def create_evidence_agent(
         )
 
     return {"agent": agent}
+
+if __name__ == "__main__":
+    agent = create_evidence_agent("large")

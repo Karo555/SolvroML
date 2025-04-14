@@ -6,6 +6,11 @@ import urllib.request
 
 from langchain_community.tools.pubmed.tool import PubmedQueryRun
 from langchain_community.utilities.pubmed import PubMedAPIWrapper
+from langchain_core.tools import tool
+from langchain_core.runnables import RunnableConfig
+from langgraph.prebuilt import InjectedState
+from langchain_core.tools import InjectedToolCallId
+from typing import Annotated
 
 
 class PubMedAPIWrapperImproved(PubMedAPIWrapper):
@@ -43,3 +48,28 @@ class PubMedAPIWrapperImproved(PubMedAPIWrapper):
         xml_text = result.read().decode("utf-8")
         text_dict = self.parse(xml_text)
         return self._parse_article(uid, text_dict)
+
+
+
+# Initialize the PubMed API wrapper
+pubmed_api_wrapper = PubMedAPIWrapperImproved(api_key=os.getenv("PUBMED_API_KEY"))
+
+@tool("pub_med", parse_docstring=True)
+def pubmed_search(
+    query: str,
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> str:
+    """
+    A wrapper around PubMed.
+    Useful for when you need to answer questions about medicine, health,
+    and biomedical topics from biomedical literature, MEDLINE, life science journals, and online books.
+    
+    Args:
+        query (str): A search query for PubMed articles.
+        
+    Returns:
+        str: Results from PubMed containing relevant medical and biomedical information.
+    """
+    return pubmed_api_wrapper.run(query)

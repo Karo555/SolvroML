@@ -10,6 +10,7 @@ from loguru import logger
 from ..tools.context import query_uniprot
 from ..llm.utils import get_model
 from ..state import ContextAgentPrivateState, HackathonState
+from ..tools import arxiv_tool, pubmed_tool, bioportal_tool#, biorxiv_tool
 
 # Escaped JSON format to avoid variable parsing errors
 CONTEXT_PROMPT = """
@@ -33,7 +34,11 @@ Entity to enrich:
 """
 
 context_tools = ToolNode([
-    query_uniprot
+    query_uniprot,
+    arxiv_tool,
+    pubmed_tool,
+    bioportal_tool,
+    # biorxiv_tool
 ])
 
 def create_context_agent(

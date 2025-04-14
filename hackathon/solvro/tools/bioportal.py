@@ -4,10 +4,12 @@ from urllib.parse import quote
 import requests
 import logging
 from pydantic import BaseModel
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Annotated
 from langchain_core.callbacks import CallbackManagerForToolRun
-from langchain_core.tools import BaseTool
+from langchain_core.tools import BaseTool, tool, InjectedToolCallId
 from pydantic import Field
+from langchain_core.runnables import RunnableConfig
+from langgraph.prebuilt import InjectedState
 
 
 logger = logging.getLogger(__name__)
@@ -101,22 +103,26 @@ class BioPortalClient(BaseModel):
             raise
 
 
-class BioPortalQueryRun(BaseTool):
-    """Tool that searches the BioPortal API."""
+# Initialize the BioPortal client
+bioportal_client = BioPortalClient()
 
-    name: str = "bioportal"
-    description: str = (
-        "BioPortalTool provides access to the BioPortal API, a comprehensive repository of biomedical ontologies. ",
-        "This tool enables ontology search, term annotation, ontology recommendations, and term mappings, ",
-        "facilitating semantic enrichment and integration of biomedical data. Ideal for applications in clinical, ",
-        "genomic, and public health domains."
-    )
-    api_wrapper: BioPortalClient = Field(default_factory=BioPortalClient)  # type: ignore[arg-type]
-
-    def _run(
-        self,
-        query: str,
-        run_manager: Optional[CallbackManagerForToolRun] = None,
-    ) -> str:
-        """Use the PubMed tool."""
-        return self.api_wrapper.search_terms(query)
+@tool("bioportal", parse_docstring=True)
+def bioportal_search(
+    query: str,
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Dict[str, Any]:
+    """
+    BioPortalTool provides access to the BioPortal API, a comprehensive repository of biomedical ontologies.
+    This tool enables ontology search, term annotation, ontology recommendations, and term mappings,
+    facilitating semantic enrichment and integration of biomedical data. Ideal for applications in clinical,
+    genomic, and public health domains.
+    
+    Args:
+        query (str): A biomedical term or concept to search for in BioPortal.
+        
+    Returns:
+        dict: Results from the BioPortal API containing ontology information.
+    """
+    return bioportal_client.search_terms(query)
