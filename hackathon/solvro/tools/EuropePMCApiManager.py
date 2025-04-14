@@ -219,7 +219,7 @@ class EuropePMCAPIManager:
         params = {"query": query, **kwargs}
         return self._request("status-update-search", params, method="POST")
 
-    def search(
+    def custom_search(
             self,
             query: str,
             result_type: str = "lite",
