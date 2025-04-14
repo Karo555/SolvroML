@@ -23,6 +23,7 @@ def improve_hypothesis(
         return END
     else:
         logger.info("Hypothesis rejected after {} iterations", state["iteration"])
+        logger.info("Critique feedback: {}", state["critique"])
         return "graph_analyst"
 
 def hypothesis_generator_mock(state: HackathonState) -> HackathonState:
