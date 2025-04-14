@@ -1,6 +1,6 @@
 from langchain.tools import BaseTool
 from typing import Optional
-from UniProtAPIWrapper import UniProtAPIWrapper
+from SolvroML.hackathon.solvro.tools.UniProtAPIWrapper import UniProtAPIWrapper
 from langchain.tools import BaseTool
 from typing import Optional
 from pydantic import Field

@@ -2,6 +2,7 @@ from langchain.tools import BaseTool
 from pydantic import Field, SkipValidation
 from DisGeNETAPIWrapper import DisGeNETAPIWrapper
 from typing import Any, Dict, List, Optional
+from typing import List, Optional
 import dotenv
 import json
 from PubMedAPIWrapperSimple import PubMedAPIWrapperSimple
