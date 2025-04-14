@@ -51,7 +51,7 @@ def gene_to_pubmed_context(
 if __name__ == "__main__":
     load_dotenv()
     disgenet_token = os.getenv("DISGENET_API_KEY")
-    pubmed_token = os.getenv("UBMED_API_KEY")
+    pubmed_token = os.getenv("PUBMED_API_KEY")
     print(f"PubMed API key: {pubmed_token}")
 
     disgenet = DisGeNETAPIWrapper(api_key=disgenet_token)
