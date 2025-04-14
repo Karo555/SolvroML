@@ -37,17 +37,21 @@ def main(file: str, output: str):
         subgraph=Subgraph.load_from_file(file_path),
         method=HypothesisGenerator(),
     )
-    logger.info("Hypothesis generated successfully")
+    logger.info(f"Hypothesis generated successfully for {file_path}")
     
-    logger.info(f"Saving hypothesis to {output_path}")
-    logger.info(f"Hypothesis generated for {file_path}")
-    with open(output_path / "temp.json", "w") as f:
-        json.dump(hypothesis["mechanistic_summaries"], f, indent=4)
+    logger.info(f"Saving mechanistic summaries to {output_path}")
+    with open(output_path / "paths.json", "w") as f:
+        json.dump(hypothesis.metadata["mechanistic_summaries"], f, indent=4)
+        
+    from pprint import pprint
+    pprint(hypothesis.title)
+    pprint(hypothesis.statement)
 
     # Save hypothesis in json and md format
-    # output_path.mkdir(parents=True, exist_ok=True)
-    # hypothesis.save(backend_path=output_path, parser_type="json")
-    # hypothesis.save(backend_path=output_path, parser_type="md")
+    logger.info(f"Saving hypothesis to {output_path}")
+    output_path.mkdir(parents=True, exist_ok=True)
+    hypothesis.save(backend_path=output_path, parser_type="json")
+    hypothesis.save(backend_path=output_path, parser_type="md")
 
     # logger.info(f"Hypothesis saved to {output_path}")
 

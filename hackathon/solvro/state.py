@@ -13,7 +13,8 @@ class MechanisticSummary(BaseModel):
 class HackathonState(MessagesState):
     subgraph: str
     context: str
-    hypothesis: str
+    title: str
+    statement: str
 
     literature: str
     references: list[str]
@@ -33,4 +34,8 @@ class HackathonState(MessagesState):
     
 @dataclass
 class ContextAgentPrivateState(AgentState):
+    mechanistic_summaries: Optional[List[Dict[str, Any]]] = None
+    
+@dataclass
+class EvidenceAgentPrivateState(AgentState):
     mechanistic_summaries: Optional[List[Dict[str, Any]]] = None

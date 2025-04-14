@@ -25,29 +25,27 @@ class HypothesisGenerator(HypothesisGeneratorProtocol):
             {"subgraph": path, "context": context},
             config=RunnableConfig(callbacks=[langfuse_callback], recursion_limit=10),
         )
-        
-        return res
 
-        # title = self.__parse_title(res, subgraph) or ""
-        # statement = self.__parse_statement(res)
+        title = self.__parse_title(res, subgraph) or ""
+        statement = self.__parse_statement(res)
         # references = self.__parse_references(res)
-        # return Hypothesis(
-        #     title=title,
-        #     statement=statement,
-        #     source=subgraph,
-        #     method=self,
-        #     references=references,
-        #     metadata={
-        #         "summary": res["summary"],
-        #         "context": res["context"],
-        #         "novelty": res["novelty"],
-        #         "feasibility": res["feasibility"],
-        #         "impact": res["impact"],
-        #         "critique": res["critique"],
-        #         "iteration": res["iteration"],
-        #         "messages": [message_to_dict(message) for message in res["messages"]],
-        #     },
-        # )
+        return Hypothesis(
+            title=title,
+            statement=statement,
+            source=subgraph,
+            method=self,
+            # references=references,
+            metadata={
+                "mechanistic_summaries": res["mechanistic_summaries"],
+                "context": res["context"],
+                # "novelty": res["novelty"],
+                # "feasibility": res["feasibility"],
+                # "impact": res["impact"],
+                # "critique": res["critique"],
+                # "iteration": res["iteration"],
+                "messages": [message_to_dict(message) for message in res["messages"]],
+            },
+        )
 
     def __parse_title(self, state: HackathonState, subgraph: Subgraph) -> str:
         title = state["title"]
@@ -59,11 +57,11 @@ class HypothesisGenerator(HypothesisGeneratorProtocol):
 
     def __parse_statement(self, state: HackathonState) -> str:
         statement_match = re.search(
-            r"Hypothesis Statement:(.+?)$", state["hypothesis"], re.DOTALL
+            r"Hypothesis Statement:(.+?)$", state["statement"], re.DOTALL
         )
         if statement_match:
             return statement_match.group(1)
-        return state["hypothesis"]
+        return state["statement"]
 
     def __parse_references(self, state: HackathonState) -> list[str]:
         return state.get("references", [])

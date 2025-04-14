@@ -99,8 +99,7 @@ def create_context_agent(
 
         return HackathonState(
             mechanistic_summaries=updated_summaries,
-            messages=state.get("messages", []),
-            remaining_steps=state.get("remaining_steps", 5),
+            messages=state.get("messages", [])
         )
 
     return {"agent": agent}
