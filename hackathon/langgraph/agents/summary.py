@@ -2,10 +2,10 @@ from typing import Any, Dict, Literal, Optional
 
 from langchain.prompts import PromptTemplate
 from loguru import logger
+from pydantic import BaseModel
 
 from ..llm.utils import get_model
 from ..state import HypgenState
-from ..utils import add_role
 
 # Summary prompt
 SUMMARY_PROMPT = """You are a skilled scientific writer.
@@ -43,6 +43,11 @@ Impact Assessment:
 """
 
 
+class HypothesisSummary(BaseModel):
+    title: str
+    summary: str
+
+
 def create_summary_agent(
     model: Optional[Literal["large", "small", "reasoning"]] = None,
     **kwargs,
@@ -51,7 +56,7 @@ def create_summary_agent(
 
     prompt = PromptTemplate.from_template(SUMMARY_PROMPT)
 
-    llm = get_model(model, **kwargs)
+    llm = get_model(model, **kwargs).with_structured_output(HypothesisSummary)
     chain = prompt | llm
 
     def agent(state: HypgenState) -> HypgenState:
@@ -62,8 +67,8 @@ def create_summary_agent(
 
         logger.info("Summary generated successfully")
         return {
-            "summary": response.content,
-            "messages": [add_role(response, "summary")],
+            "summary": response.summary,
+            "title": response.title,
         }
 
     return {"agent": agent}

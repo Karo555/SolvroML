@@ -8,6 +8,7 @@ from .agents.analysts import create_analyst_agent
 from .agents.critique_analyst import create_critique_analyst_agent
 from .agents.hypothesis_generator import create_hypothesis_generator_agent
 from .agents.hypothesis_refiner import create_hypothesis_refiner_agent
+from .agents.literature import create_literature_agent
 from .agents.ontologist import create_ontologist_agent
 from .agents.summary import create_summary_agent
 from .state import HypgenState
@@ -38,6 +39,7 @@ def create_hypgen_graph() -> CompiledGraph:
     graph.add_node(
         "hypothesis_refiner", create_hypothesis_refiner_agent("small")["agent"]
     )
+    graph.add_node("literature_agent", create_literature_agent("small")["agent"])
     graph.add_node("novelty_analyst", create_analyst_agent("novelty", "small")["agent"])
     graph.add_node(
         "feasibility_analyst", create_analyst_agent("feasibility", "small")["agent"]
@@ -49,14 +51,14 @@ def create_hypgen_graph() -> CompiledGraph:
     # Add edges
     graph.add_edge(START, "ontologist")
     graph.add_edge("ontologist", "hypothesis_generator")
-    # # Fork initial hypothesis
-    graph.add_edge("hypothesis_generator", "novelty_analyst")
-    graph.add_edge("hypothesis_generator", "feasibility_analyst")
-    graph.add_edge("hypothesis_generator", "impact_analyst")
-    # # Fork refined hypothesis
-    graph.add_edge("hypothesis_refiner", "novelty_analyst")
-    graph.add_edge("hypothesis_refiner", "feasibility_analyst")
-    graph.add_edge("hypothesis_refiner", "impact_analyst")
+    # From initial hypothesis
+    graph.add_edge("hypothesis_generator", "literature_agent")
+    # From refined hypothesis
+    graph.add_edge("hypothesis_refiner", "literature_agent")
+    # # Fork
+    graph.add_edge("literature_agent", "novelty_analyst")
+    graph.add_edge("literature_agent", "feasibility_analyst")
+    graph.add_edge("literature_agent", "impact_analyst")
     # # Join
     graph.add_edge("novelty_analyst", "critique_analyst")
     graph.add_edge("feasibility_analyst", "critique_analyst")

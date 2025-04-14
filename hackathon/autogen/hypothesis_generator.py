@@ -19,6 +19,16 @@ class HypgenResult(BaseModel):
     statement: str
 
 
+class Reference(BaseModel):
+    title: str
+    url: str
+    summary: str
+
+
+class ReferenceList(BaseModel):
+    references: list[Reference]
+
+
 class HypothesisGenerator(HypothesisGeneratorProtocol):
     def run(self, subgraph: Subgraph) -> Hypothesis:
         # Initialize Langfuse
@@ -46,16 +56,21 @@ In the end, rate the novelty and feasibility of the research idea.""",
         messages = "\n".join([message["content"] for message in group_chat.messages])
 
         result = self.summarize_conversation(messages)
+        references_obj = self.get_references(messages)
 
         return Hypothesis(
             title=result.title,
             statement=result.statement,
             source=subgraph,
             method=self,
+            references=[
+                f"Title: {reference.title} URL: {reference.url} Summary: {reference.summary}"
+                for reference in references_obj.references
+            ],
             metadata={"messages": res.chat_history},
         )
 
-    def summarize_conversation(self, messages: list[dict]) -> HypgenResult:
+    def summarize_conversation(self, messages: str) -> HypgenResult:
         config = get_llm_config("large")
         client = OpenAIWrapper(
             config_list=config.config_list,
@@ -71,6 +86,25 @@ In the end, rate the novelty and feasibility of the research idea.""",
             response_format=HypgenResult,
         )
         return HypgenResult.model_validate(
+            json.loads(structured_res.choices[0].message.content)
+        )
+
+    def get_references(self, messages: str) -> ReferenceList:
+        config = get_llm_config("large")
+        client = OpenAIWrapper(
+            config_list=config.config_list,
+        )
+        structured_res = client.create(
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You gather the literature from the conversation",
+                },
+                {"role": "user", "content": messages},
+            ],
+            response_format=ReferenceList,
+        )
+        return ReferenceList.model_validate(
             json.loads(structured_res.choices[0].message.content)
         )
 

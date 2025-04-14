@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 import random
@@ -97,6 +98,7 @@ class Subgraph(KnowledgeGraph):
         start_node: str,
         end_node: str,
         path_nodes: List[str],
+        subgraph_id: str,
         additional_nodes: Optional[Set[str]] = None,
     ) -> None:
         """
@@ -107,6 +109,7 @@ class Subgraph(KnowledgeGraph):
             start_node (str): The starting node for the path
             end_node (str): The ending node for the path
             path_nodes (List[str]): Nodes on the path from start_node to end_node
+            subgraph_id (str): The ID of the subgraph
             additional_nodes (Optional[Set[str]]): Additional nodes to include in the subgraph
 
         Raises:
@@ -122,6 +125,7 @@ class Subgraph(KnowledgeGraph):
         self._context = None
         self._path_score = None
         self._path_score_justification = None
+        self._subgraph_id = subgraph_id
 
         # Validate nodes exist in the graph
         if not original_graph.has_node(start_node):
@@ -203,6 +207,9 @@ class Subgraph(KnowledgeGraph):
         # Generate the path nodes using the provided method
         path_nodes = method.generate_path_nodes(original_graph, start_node, end_node)
 
+        # Create a unique ID for the subgraph (hash of the path nodes)
+        subgraph_id = hashlib.sha256(str(path_nodes).encode()).hexdigest()
+
         # Select additional nodes using the helper function
         additional_nodes = select_additional_nodes(
             original_graph, path_nodes, neighbor_probability, max_nodes
@@ -214,6 +221,7 @@ class Subgraph(KnowledgeGraph):
             start_node,
             end_node,
             path_nodes,
+            subgraph_id,
             additional_nodes,
         )
 
@@ -249,6 +257,9 @@ class Subgraph(KnowledgeGraph):
         # Use the last node in the path as the end node
         end_node = path_nodes[-1]
 
+        # Create a unique ID for the subgraph (hash of the path nodes)
+        subgraph_id = hashlib.sha256(str(path_nodes).encode()).hexdigest()
+
         # Select additional nodes using the helper function
         additional_nodes = select_additional_nodes(
             original_graph, path_nodes, neighbor_probability, max_nodes
@@ -260,6 +271,7 @@ class Subgraph(KnowledgeGraph):
             start_node,
             end_node,
             path_nodes,
+            subgraph_id,
             additional_nodes,
         )
 
@@ -292,6 +304,16 @@ class Subgraph(KnowledgeGraph):
             str: The ending node
         """
         return self._end_node
+
+    @property
+    def subgraph_id(self) -> str:
+        """
+        Get the subgraph ID.
+
+        Returns:
+            str: The subgraph ID
+        """
+        return self._subgraph_id
 
     @property
     def original_graph(self) -> KnowledgeGraph:
@@ -754,6 +776,7 @@ class Subgraph(KnowledgeGraph):
 
         # Build the complete metadata dictionary
         metadata = {
+            "subgraph_id": self._subgraph_id,
             "graph_data": graph_data,
             "graph_stats": graph_stats,
             "start_node": self._start_node,
@@ -808,6 +831,7 @@ class Subgraph(KnowledgeGraph):
         subgraph._start_node = data["start_node"]
         subgraph._end_node = data["end_node"]
         subgraph._path_nodes = data["path_nodes"]
+        subgraph._subgraph_id = data["subgraph_id"]
         subgraph._context = data["context"]
         subgraph._path_score = data.get("path_score")
         subgraph._path_score_justification = data.get("path_score_justification")

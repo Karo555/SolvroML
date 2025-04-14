@@ -1,3 +1,4 @@
+import hashlib
 from dataclasses import dataclass, field
 from typing import Any, Dict, Literal, Optional
 
@@ -34,6 +35,16 @@ class Hypothesis:
             A new Hypothesis instance
         """
         return method.run(subgraph)
+
+    @property
+    def hypothesis_id(self) -> str:
+        """The ID of the hypothesis."""
+        return hashlib.sha256(str(self.statement).encode()).hexdigest()
+
+    @property
+    def subgraph_id(self) -> str:
+        """The ID of the subgraph."""
+        return self.source.subgraph_id
 
     def save(
         self,
