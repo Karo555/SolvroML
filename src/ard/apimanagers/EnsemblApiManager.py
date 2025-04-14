@@ -357,19 +357,53 @@ class EnsemblApiClient:
     # LOOKUP
 
     def get_lookup_by_id(self, identifier):
-        """Find species and database for a single identifier (gene, transcript, etc)."""
+        """
+        Finds species and database for a single identifier (e.g., gene, transcript).
+
+        Args:
+            identifier (str): The identifier to look up.
+
+        Returns:
+            dict: The JSON response containing species and database information.
+        """
         return self.get(f"lookup/id/{identifier}")
 
     def post_lookup_by_ids(self, id_list):
-        """Find species and database for multiple identifiers."""
+        """
+        Finds species and database for multiple identifiers.
+
+        Args:
+            id_list (list of str): A list of identifiers to look up.
+
+        Returns:
+            dict: The JSON response containing species and database information for the identifiers.
+        """
         return self.post("lookup/id", data={"ids": id_list})
 
     def get_lookup_by_symbol(self, species, symbol):
-        """Find species and DB for a symbol in an external database."""
+        """
+        Finds species and database for a symbol in an external database.
+
+        Args:
+            species (str): The species name.
+            symbol (str): The symbol to look up.
+
+        Returns:
+            dict: The JSON response containing species and database information for the symbol.
+        """
         return self.get(f"lookup/symbol/{species}/{symbol}")
 
     def post_lookup_by_symbols(self, species, symbols):
-        """Find species and DB for a list of symbols."""
+        """
+        Finds species and database for a list of symbols.
+
+        Args:
+            species (str): The species name.
+            symbols (list of str): A list of symbols to look up.
+
+        Returns:
+            dict: The JSON response containing species and database information for the symbols.
+        """
         return self.post(f"lookup/symbol/{species}", data={"symbols": symbols})
 
     # OVERLAP
@@ -630,6 +664,6 @@ class EnsemblApiClient:
 # Usage example:
 if __name__ == "__main__":
     client = EnsemblApiClient()
-    post_variation = client.post_variations_by_ids("human", "26318936")
+    post_variation = client.get_variation_by_pmcid("human", "PMC5002951")
     result2  = client.get_phenotype_by_term("human", "neurodevelopmental disorder")
     print(post_variation)
