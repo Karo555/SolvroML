@@ -465,15 +465,171 @@ class EnsemblApiClient:
         """
         return self.get(f"phenotype/term/{species}/{term}")
 
+    # SEQUENCE
 
+    def get_sequence_by_id(self, stable_id):
+        """
+        Retrieves the sequence for a specific stable ID.
 
+        Args:
+            stable_id (str): The stable ID of the sequence to retrieve.
 
+        Returns:
+            dict: The JSON response containing the sequence data.
+        """
+        return self.get(f"sequence/id/{stable_id}")
 
+    def post_sequence_by_ids(self, ids):
+        """
+        Retrieves sequences for multiple stable IDs.
+
+        Args:
+            ids (list of str): A list of stable IDs to retrieve sequences for.
+
+        Returns:
+            dict: The JSON response containing the sequences data.
+        """
+        return self.post("sequence/id", data={"ids": ids})
+
+    def get_sequence_by_region(self, species, region):
+        """
+        Retrieves the sequence for a specific genomic region in a species.
+
+        Args:
+            species (str): The species name.
+            region (str): The genomic region to retrieve the sequence for.
+
+        Returns:
+            dict: The JSON response containing the sequence data.
+        """
+        return self.get(f"sequence/region/{species}/{region}")
+
+    def post_sequence_by_regions(self, species, regions):
+        """
+        Retrieves sequences for multiple genomic regions in a species.
+
+        Args:
+            species (str): The species name.
+            regions (list of str): A list of genomic regions to retrieve sequences for.
+
+        Returns:
+            dict: The JSON response containing the sequences data.
+        """
+        return self.post(f"sequence/region/{species}", data={"regions": regions})
+
+    # VEP
+
+    def get_vep_by_id(self, species, variant_id):
+        """
+        Retrieves Variant Effect Predictor (VEP) results for a specific variant ID.
+
+        Args:
+            species (str): The species name.
+            variant_id (str): The variant ID to retrieve VEP results for.
+
+        Returns:
+            dict: The JSON response containing the VEP results.
+        """
+        return self.get(f"vep/{species}/id/{variant_id}")
+
+    def post_vep_by_ids(self, species, ids):
+        """
+        Retrieves VEP results for multiple variant IDs.
+
+        Args:
+            species (str): The species name.
+            ids (list of str): A list of variant IDs to retrieve VEP results for.
+
+        Returns:
+            dict: The JSON response containing the VEP results.
+        """
+        return self.post(f"vep/{species}/id", data={"ids": ids})
+
+    # VARIATION
+
+    def get_variant_recoder(self, species, variant_id):
+        """
+        Translates a variant identifier or notation to all equivalent forms (e.g., HGVS, SPDI).
+
+        Args:
+            species (str): The species name.
+            variant_id (str): The variant ID or notation to translate.
+
+        Returns:
+            dict: The JSON response containing the equivalent forms of the variant.
+        """
+        return self.get(f"variant_recoder/{species}/{variant_id}")
+
+    def post_variant_recoder(self, species, identifiers):
+        """
+        Translates a list of variant identifiers or notations to all equivalent forms.
+
+        Args:
+            species (str): The species name.
+            identifiers (list of str): A list of variant IDs or notations to translate.
+
+        Returns:
+            dict: The JSON response containing the equivalent forms of the variants.
+        """
+        return self.post(f"variant_recoder/{species}", data={"ids": identifiers})
+
+    def get_variation_by_id(self, species, variant_id):
+        """
+        Fetches variation features by Ensembl ID (e.g., rsID).
+
+        Args:
+            species (str): The species name.
+            variant_id (str): The Ensembl ID of the variation to retrieve.
+
+        Returns:
+            dict: The JSON response containing the variation features.
+        """
+        return self.get(f"variation/{species}/{variant_id}")
+
+    def get_variation_by_pmcid(self, species, pmcid):
+        """
+        Fetches variants associated with a specific publication (PubMed Central ID).
+
+        Args:
+            species (str): The species name.
+            pmcid (str): The PubMed Central ID of the publication.
+
+        Returns:
+            dict: The JSON response containing the associated variants.
+        """
+        return self.get(f"variation/{species}/pmcid/{pmcid}")
+
+    def get_variation_by_pmid(self, species, pmid):
+        """
+        Fetches variants associated with a specific publication (PubMed ID).
+
+        Args:
+            species (str): The species name.
+            pmid (str): The PubMed ID of the publication.
+
+        Returns:
+            dict: The JSON response containing the associated variants.
+        """
+        return self.get(f"variation/{species}/pmid/{pmid}")
+
+    def post_variations_by_ids(self, species, ids):
+        """
+        Fetches variation features for a list of variant IDs (e.g., rsIDs).
+
+        Args:
+            species (str): The species name.
+            ids (list of str): A list of variant IDs to retrieve variation features for.
+
+        Returns:
+            dict: The JSON response containing the variation features.
+        """
+        return self.post(f"variation/{species}", data={"ids": ids})
 
 
 
 # Usage example:
 if __name__ == "__main__":
     client = EnsemblApiClient()
+    post_variation = client.post_variations_by_ids("human", "26318936")
     result2  = client.get_phenotype_by_term("human", "neurodevelopmental disorder")
-    print(result2)
+    print(post_variation)
