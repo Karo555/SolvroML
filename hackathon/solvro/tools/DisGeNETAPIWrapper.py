@@ -26,7 +26,7 @@ class DisGeNETAPIWrapper:
 
         retry = 0
         while retry <= self.max_retry:
-            response = requests.get(self.base_url, headers=self.headers, params=params, verify=False)
+            response = requests.get(self.base_url, headers=self.headers, params=params)
 
             if response.status_code == 429:
                 wait_time = int(response.headers.get("x-rate-limit-retry-after-seconds", 5))
