@@ -7,8 +7,8 @@ from typing import Annotated, Dict, Any
 from .backends.UniProtAPIWrapper import UniProtAPIWrapper
 from .backends.UniProtQueryTool import parse_uniprot_entry
 from .backends.EnsemblApiManager import EnsemblApiClient
-
 from backends.BioRxivAPIManager import BioRxivAPIManager
+from .backends.EuropePMCApiManager import EuropePMCAPIManager
 
 # Initialize UniProt wrapper
 api_wrapper = UniProtAPIWrapper()
@@ -16,6 +16,7 @@ api_wrapper = UniProtAPIWrapper()
 biorxiv_api = BioRxivAPIManager()
 # Initialize Ensembl API client
 ensembl_api = EnsemblApiClient()
+#EuropePMC API
 
 @tool("query_uniprot", parse_docstring=True)
 def query_uniprot(
@@ -399,4 +400,215 @@ def get_variation_by_pmid(
     return ensembl_api.get_phenotype_by_pmid(species, pmid)
 
 @tool("eupmcapi_get_article_by_id", parse_docstring=True)
+def eupmcapi_get_article_by_id(
+    query: Dict[str, Any],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Dict[str, Any]:
+    """
+    Retrieves article details by its ID.
 
+    Args:
+        query (str): The ID of the article.
+
+    Returns:
+        dict: The JSON response containing the article details.
+    """
+
+    return EuropePMCAPIManager().get_article(query)
+@tool("eupmcapi_get_references", parse_docstring=True)
+def eupmcapi_get_references(
+    query: Dict[str, Any],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Dict[str, Any]:
+    """
+    Retrieves references for a specific article.
+
+    Args:
+        query (str): The ID of the article.
+
+    Returns:
+        dict: The JSON response containing the references.
+    """
+    return EuropePMCAPIManager().get_references(query)
+
+@tool("eupmcapi_get_citations", parse_docstring=True)
+def eupmcapi_get_citations(
+    query: Dict[int, Any],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Dict[str, Any]:
+    """
+    Retrieves citations for a specific article.
+
+    Args:
+        query (str): The ID of the article.
+
+    Returns:
+        dict: The JSON response containing the citations.
+    """
+    return EuropePMCAPIManager().get_citations(query)
+@tool("eupmcapi_get_db_links", parse_docstring=True)
+def eupmcapi_get_db_links(
+    query: Dict[str, Any],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Dict[str, Any]:
+    """
+    Retrieves database links for a specific article.
+
+    Args:
+        query (str): The ID of the article.
+
+    Returns:
+        dict: The JSON response containing the database links.
+    """
+    return EuropePMCAPIManager().get_database_links(query)
+@tool("eupmcapi_get_lab_links", parse_docstring=True)
+def eupmcapi_get_lab_links(
+    query: Dict[str, Any],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Dict[str, Any]:
+    """
+    Retrieves lab links for a specific article.
+
+    Args:
+        query (str): The ID of the article.
+
+    Returns:
+        dict: The JSON response containing the lab links.
+    """
+    return EuropePMCAPIManager().get_labs_links(query)
+
+@tool("eupmcapi_get_full_text_xml", parse_docstring=True)
+def eupmcapi_get_full_text_xml(
+    query: Dict[str, Any],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> str:
+    """
+    Retrieves the full text of an article in XML format.
+
+    Args:
+        query (Dict[str, Any]): A dictionary containing the query parameters.
+
+    Returns:
+        str: The full text in XML format.
+    """
+    return str(EuropePMCAPIManager().get_full_text_xml(query[0]))
+
+@tool("eupmcapi_get_book_xml", parse_docstring=True)
+def eupmcapi_get_book_xml(
+    query: Dict[str, Any],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> str:
+    """
+    Retrieves the full text of a book in XML format.
+
+    Args:
+        query (str): The ID of the book.
+
+    Returns:
+        dict: The JSON response containing the full text.
+    """
+    return str(EuropePMCAPIManager().get_book_xml(query[0]))
+@tool("eupmcapi_get_supplementary_files", parse_docstring=True)
+def eupmcapi_get_supplementary_files(
+    query: Dict[str, Any],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) ->Dict[str, Any]:
+    """
+    Retrieves supplementary files for a specific article.
+
+    Args:
+        query (str): The ID of the article.
+
+    Returns:
+        dict: The JSON response containing the supplementary files.
+    """
+    return EuropePMCAPIManager().get_supplementary_files(query[0])
+@tool("eupmcapi_get_evaluations", parse_docstring=True)
+def eupmcapi_get_evaluations(
+    query: Dict[str, Any],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Dict[str, Any]:
+    """
+    Retrieves evaluations for a specific article.
+
+    Args:
+        query (str): The ID of the article.
+
+    Returns:
+        dict: The JSON response containing the evaluations.
+    """
+    id = query.get("id")
+    if not id:
+        return {"error": "ID is required."}
+    source = query.get("source")
+    return EuropePMCAPIManager().get_evaluations(id, source)
+
+@tool("eupmcapi_custom_search", parse_docstring=True)
+def eupmcapi_custom_search(
+    query: Dict[str, Any],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Dict[str, Any]:
+    """
+    Performs a custom search on Europe PMC.
+
+    Args:
+        query (str): The search term.
+
+    Returns:
+        dict: The JSON response containing the search results.
+    """
+    if not query:
+        return {"error": "Query is required."}
+    search_query = query.get("query")
+    result_type = query.get("result_type")
+    sort_by_citations = query.get("sort_by_citations", False or True)
+    return EuropePMCAPIManager().custom_search(
+        search_query, result_type, sort_by_citations
+    )
+@tool("eupmcapi_get_most_cited_in period", parse_docstring=True)
+def eupmcapi_get_most_cited_in_period(
+    query: Dict[str, Any],
+    tool_call_id: Annotated[str, InjectedToolCallId],
+    config: RunnableConfig,
+    state: Annotated[dict, InjectedState],
+) -> Dict[str, Any]:
+    """
+    Retrieves the most cited articles in a specific period.
+
+    Args:
+        query (str): The search term.
+
+    Returns:
+        dict: The JSON response containing the most cited articles.
+    """
+    if not query:
+        return {"error": "Query is required."}
+    search_keyword = query.get("keyword")
+    start_year = query.get("start_year")
+    end_year = query.get("end_year")
+    result_type = "core"
+    max_results = 1000
+
+    return EuropePMCAPIManager().get_most_cited_in_period(
+        search_keyword, start_year, end_year, result_type, max_results
+    )
