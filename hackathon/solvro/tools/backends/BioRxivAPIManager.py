@@ -21,6 +21,25 @@ class BioRxivAPIManager:
         """
         self.server = server
 
+    def _get(self, url: str):
+        """
+        Sends a GET request to the specified URL.
+
+        Args:
+            url (str): The URL to send the GET request to.
+
+        Returns:
+            dict or str: The API response in JSON or XML format, or None if an error occurs.
+        """
+        try:
+            response = requests.get(url)
+            response.raise_for_status()
+            return response.json() if "json" in url else response.text
+        except requests.RequestException as e:
+            print(f"Error fetching data from {url}: {e}")
+            return None
+
+
     def fetch_details_by_date_range(
         self, start_date: str, end_date: str, cursor: int = 0,
         category: Optional[str] = None, format: str = "json"
@@ -135,23 +154,6 @@ class BioRxivAPIManager:
         url = f"{BASE_URL}/usage/{interval}/{format}"
         return self._get(url)
 
-    def _get(self, url: str):
-        """
-        Sends a GET request to the specified URL.
-
-        Args:
-            url (str): The URL to send the GET request to.
-
-        Returns:
-            dict or str: The API response in JSON or XML format, or None if an error occurs.
-        """
-        try:
-            response = requests.get(url)
-            response.raise_for_status()
-            return response.json() if "json" in url else response.text
-        except requests.RequestException as e:
-            print(f"Error fetching data from {url}: {e}")
-            return None
 
 
 # Example usage
@@ -159,8 +161,14 @@ if __name__ == "__main__":
     manager = BioRxivAPIManager(server="biorxiv")
 
     # Fetch details for articles in a specific date range and category
-    result = manager.fetch_details_by_date_range("2025-03-21", "2025-03-28", category="cell_biology")
+    # result = manager.fetch_details_by_date_range("2025-03-21", "2025-03-28", category="cell_biology")
+    # if result:
+    #     print(f"Found {result['messages'][0]['count']} articles.")
+    #     for paper in result["collection"][:3]:  # just preview 3
+    #         print(f"- {paper['title']} ({paper['date']})")
+
+    result = manager.fetch_usage_statistics(interval="m", format="json")
     if result:
-        print(f"Found {result['messages'][0]['count']} articles.")
-        for paper in result["collection"][:3]:  # just preview 3
-            print(f"- {paper['title']} ({paper['date']})")
+        print(f"Usage statistics: {result}")
+    else:
+        print("Failed to fetch usage statistics.")
