@@ -40,7 +40,7 @@ Interpretation:
 """
 
 evidence_tools = ToolNode([
-    # pubmed_tool,
+    pubmed_tool,
     arxiv_tool,
     # biorxiv_tool,
     bioportal_tool,

@@ -7,7 +7,7 @@ from typing import Annotated, Dict, Any
 from .backends.UniProtAPIWrapper import UniProtAPIWrapper
 from .backends.UniProtQueryTool import parse_uniprot_entry
 from .backends.EnsemblApiManager import EnsemblApiClient
-from backends.BioRxivAPIManager import BioRxivAPIManager
+from .backends.BioRxivAPIManager import BioRxivAPIManager
 from .backends.EuropePMCApiManager import EuropePMCAPIManager
 
 # Initialize UniProt wrapper
@@ -192,7 +192,7 @@ def ensembl_get_assembly_info(
     """
     return ensembl_api.get_assembly_info(query)
 
-@tool("ensembl_get_species_list", parse_docstring=True)
+@tool("ensembl_get_species_list")
 def ensembl_get_species_list(
     tool_call_id: Annotated[str, InjectedToolCallId],
     config: RunnableConfig,
@@ -205,6 +205,7 @@ def ensembl_get_species_list(
         dict: The JSON response containing the list of species.
     """
     return ensembl_api.get_species_list()
+
 @tool("ensembl_get_sequence_by_id", parse_docstring=True)
 def ensembl_get_sequence_by_id(
     query: str,
