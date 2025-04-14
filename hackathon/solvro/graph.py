@@ -14,7 +14,7 @@ from .state import HackathonState
 
 def improve_hypothesis(
     state: HackathonState,
-) -> Literal["hypothesis_generator", END]:
+) -> Literal["graph_analyst", END]:
     if state["iteration"] > 3:
         logger.info("Iteration limit reached after {} iterations", state["iteration"])
         return END
@@ -23,7 +23,7 @@ def improve_hypothesis(
         return END
     else:
         logger.info("Hypothesis rejected after {} iterations", state["iteration"])
-        return "hypothesis_generator"
+        return "graph_analyst"
 
 def hypothesis_generator_mock(state: HackathonState) -> HackathonState:
     """
