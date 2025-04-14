@@ -3,7 +3,6 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
 from ard.storage.file import StorageBackend
-from ard.storage.file.utils import sanitize_filename
 
 if TYPE_CHECKING:
     from ard.hypothesis.hypothesis import Hypothesis
@@ -30,15 +29,12 @@ class HypothesisSaver:
 
         self.storage_backend.save_file(
             file_name,
-            f"{file_name}.{self.parser.output_type}",
+            f"hypothesis.{self.parser.output_type}",
             bytes(parsed_hypothesis, "utf-8"),
         )
 
     def get_file_name(self, hypothesis: "Hypothesis") -> str:
-        file_name = sanitize_filename(hypothesis.title)
-
-        if len(file_name) > 100:
-            file_name = f"{file_name[:100]}[truncated]"
+        file_name = f"{hypothesis.subgraph_id[:10]}-{hypothesis.hypothesis_id[:10]}"
 
         return file_name
 
@@ -50,6 +46,10 @@ class MarkdownParser(Parser):
         return f"""
 # {hypothesis.title}
 
+**Hypothesis ID:** {hypothesis.hypothesis_id}
+
+**Subgraph ID:** {hypothesis.subgraph_id}
+
 {hypothesis.statement}
 
 ## References
@@ -59,7 +59,7 @@ class MarkdownParser(Parser):
 {hypothesis.source._context}
 
 ## Subgraph
-```cypher
+```
 {hypothesis.source.to_cypher_string()}
 ```
 """
@@ -73,6 +73,8 @@ class JSONParser(Parser):
             {
                 "title": hypothesis.title,
                 "text": hypothesis.statement,
+                "hypothesis_id": hypothesis.hypothesis_id,
+                "subgraph_id": hypothesis.subgraph_id,
                 "references": hypothesis.references,
                 "metadata": hypothesis.metadata,
                 "method_name": str(hypothesis.method),

@@ -7,6 +7,8 @@ def sanitize_filename(file_name: str) -> str:
     """Normalize file name by replacing all non-alphanumeric characters with underscores."""
     # Replace all non-alphanumeric characters with underscores
     normalized = re.sub(r"[^a-zA-Z0-9]", "_", file_name)
+    # Reduce multiple underscores to a single underscore
+    normalized = re.sub(r"_+", "_", normalized)
     return normalized
 
 

@@ -24,13 +24,15 @@ class HypothesisGenerator(HypothesisGeneratorProtocol):
             config=RunnableConfig(callbacks=[langfuse_callback], recursion_limit=100),
         )
 
-        title = self.__parse_title(res) or ""
+        title = self.__parse_title(res, subgraph) or ""
         statement = self.__parse_statement(res)
+        references = self.__parse_references(res)
         return Hypothesis(
             title=title,
             statement=statement,
             source=subgraph,
             method=self,
+            references=references,
             metadata={
                 "summary": res["summary"],
                 "context": res["context"],
@@ -43,11 +45,13 @@ class HypothesisGenerator(HypothesisGeneratorProtocol):
             },
         )
 
-    def __parse_title(self, state: HypgenState) -> str:
-        title_match = re.search(r"Title:.*“(.+?)”", state["hypothesis"])
-        if title_match:
-            return title_match.group(1)
-        return f"Hypothesis for {state['subgraph']}"
+    def __parse_title(self, state: HypgenState, subgraph: Subgraph) -> str:
+        title = state["title"]
+        if title:
+            return title
+        start_node = subgraph.start_node
+        end_node = subgraph.end_node
+        return f"Hypothesis for {start_node} -> {end_node}"
 
     def __parse_statement(self, state: HypgenState) -> str:
         statement_match = re.search(
@@ -56,6 +60,9 @@ class HypothesisGenerator(HypothesisGeneratorProtocol):
         if statement_match:
             return statement_match.group(1)
         return state["hypothesis"]
+
+    def __parse_references(self, state: HypgenState) -> list[str]:
+        return state.get("references", [])
 
     def __str__(self) -> str:
         return "HypeGen Generator"
